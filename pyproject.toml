@@ -8,6 +8,7 @@ authors = ["Jon Clayton <m87tech@gmail.com>"]
 python = "^3.7"
 pydantic = "^1.8.2"
 paramiko = "^2.7.2"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -20,6 +21,7 @@ nox = "^2021.6.12"
 pylint = "^2.8.3"
 pydocstyle = "^6.1.1"
 pycodestyle = "^2.7.0"
+rope = "^0.19.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

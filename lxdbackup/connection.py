@@ -16,7 +16,11 @@ class FactoryConnection:
         c = client.SSHClient()
         c.load_system_host_keys()
         c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        c.connect(hostname=connect_args.hostname)
+        c.connect(
+            hostname=connect_args.hostname,
+            username=connect_args.username,
+            password=connect_args.password,
+        )
         return c
 
 
