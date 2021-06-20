@@ -16,7 +16,7 @@ def main():
     # todo
     lxd = backup.Lxd(conn=conn)
     server = backup.Server(conn=conn, lxd=lxd)  # ! todo
-    container_list: List = server.lxd.command.list_containers()
+    container_list = server.lxd.command.list_containers()
     # result: BackupResult = server.lxd.command.backup_all_running_containers(
     #    containers=container_list
     # )

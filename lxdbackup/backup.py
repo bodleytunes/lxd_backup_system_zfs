@@ -42,7 +42,11 @@ class Lxd:
         # run command to get list of all containers
         return self.command.run_command(command=ListLxdCommand(), conn=self.conn)
 
-    # def list_containers(self)
+    def list_containers(self):
+        container_list = self.command.run_command(
+            command=ListLxdCommand(), conn=self.conn
+        )
+        return self.command.run
 
 
 class ListLxdCommand(Command):
@@ -52,10 +56,9 @@ class ListLxdCommand(Command):
         super().__init__()
 
     def run_command(self, conn: Connection):
-        output = conn.conn.exec_command("hello world")
-        # output = subprocess.run(f"lxc list {self.OUTPUT_TYPE}")
-        # json_output = print(f"lxc list --output json")
-        print(output)
+        #! todo fix this why no output
+        stdin, stdout, stderr = conn.conn.exec_command("ls -lahst")
+        output = stdout.readlines()
 
         return output
 
