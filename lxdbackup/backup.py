@@ -1,38 +1,56 @@
 from abc import ABC, abstractmethod
+import subprocess
 from typing import Any, Container, List
 from pydantic import BaseModel
-from connection import Connection
+
+from lxdbackup.connection import Connection
+
+
+class Command:
+    command_type = None
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def run_command(self, command=None):
+        command.run_command()
+
+
+class Container(BaseModel):
+
+    name: str = None
+    started: bool = None
 
 
 class Lxd(ABC):
 
     containers: List[Container]
+    command: Command
 
     def __init__(self) -> None:
         super().__init__()
+        self.command = Command()
         self.containers = self._get_all_containers()
 
-    def _get_all_containers():
+    def _get_all_containers(self):
         # run command to get list of all containers
-        command = ListLxdCommand()
-        command.run_command()
-        pass
+        return self.command.run_command(command=ListLxdCommand())
 
-
-class Command(ABC):
-    @abstractmethod
-    def run_command():
-        pass
+    # def list_containers(self)
 
 
 class ListLxdCommand(Command):
+    OUTPUT_TYPE = "--output json"
+
     def __init__(self) -> None:
         super().__init__()
 
     def run_command(self):
-        json_output = print(f"lxc list --output json")
+        output = subprocess.run(f"lxc list {self.OUTPUT_TYPE}")
+        # json_output = print(f"lxc list --output json")
+        print(output)
 
-        dict_output = self.json_to_dict(json_output)
+        return output
 
     def json_to_dict(self, json_output):
 
@@ -47,20 +65,14 @@ class BackupLxdCommand(Command):
         pass
 
 
-class Container(BaseModel):
-
-    name: str = None
-    started: bool = None
-
-
 class Server:
 
     conn: Connection = None
     lxd: Lxd = None
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
+    def __init__(self, conn: Connection) -> None:
         self.lxd = self._get_lxd_instance()
+        self.conn = conn
 
     def _get_lxd_instance(self):
         self.lxd = Lxd()

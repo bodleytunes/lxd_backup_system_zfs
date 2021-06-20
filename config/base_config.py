@@ -27,7 +27,7 @@ class BaseConfig:
         return PASSWORD
 
     @staticmethod
-    def get_password(filename):
+    def get_hostname(filename):
 
         if os.getenv("HOSTNAME") is not None:
             HOSTNAME = os.environ.get("HOSTNAME")

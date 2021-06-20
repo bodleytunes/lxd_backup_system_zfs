@@ -1,3 +1,4 @@
+from typing import List
 from pydantic.main import BaseConfig
 from lxdbackup import backup, connection
 from config.base_config import BaseConfig
@@ -9,11 +10,15 @@ FILENAME = ".creds.yml"
 
 def main():
     username, password, hostname = get_credentials()
-    connect_args = get_connect_args(username, password)
+    connect_args = get_connect_args(username, password, hostname)
     paramiko = connection.FactoryConnection.get_paramiko_connection(connect_args)
     conn = connection.Connection(conn=paramiko)
     # todo
-    lxd = backup.Server(conn=conn)  # ! todo
+    server = backup.Server(conn=conn)  # ! todo
+    container_list: List = server.lxd.command.list_containers()
+    result: BackupResult = server.lxd.command.backup_all_running_containers(
+        containers=container_list
+    )
 
 
 def get_connect_args(username, password, hostname):
