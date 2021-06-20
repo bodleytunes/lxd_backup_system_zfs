@@ -14,11 +14,12 @@ def main():
     paramiko = connection.FactoryConnection.get_paramiko_connection(connect_args)
     conn = connection.Connection(conn=paramiko)
     # todo
-    server = backup.Server(conn=conn)  # ! todo
+    lxd = backup.Lxd(conn=conn)
+    server = backup.Server(conn=conn, lxd=lxd)  # ! todo
     container_list: List = server.lxd.command.list_containers()
-    result: BackupResult = server.lxd.command.backup_all_running_containers(
-        containers=container_list
-    )
+    # result: BackupResult = server.lxd.command.backup_all_running_containers(
+    #    containers=container_list
+    # )
 
 
 def get_connect_args(username, password, hostname):

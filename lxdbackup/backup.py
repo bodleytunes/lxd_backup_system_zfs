@@ -12,8 +12,12 @@ class Command:
     def __init__(self) -> None:
         super().__init__()
 
-    def run_command(self, command=None):
-        command.run_command()
+    def run_command(
+        self,
+        conn: Connection,
+        command=None,
+    ):
+        command.run_command(conn=conn)
 
 
 class Container(BaseModel):
@@ -22,19 +26,21 @@ class Container(BaseModel):
     started: bool = None
 
 
-class Lxd(ABC):
+class Lxd:
 
     containers: List[Container]
     command: Command
+    conn: Connection
 
-    def __init__(self) -> None:
+    def __init__(self, conn: Connection) -> None:
         super().__init__()
         self.command = Command()
+        self.conn = conn
         self.containers = self._get_all_containers()
 
     def _get_all_containers(self):
         # run command to get list of all containers
-        return self.command.run_command(command=ListLxdCommand())
+        return self.command.run_command(command=ListLxdCommand(), conn=self.conn)
 
     # def list_containers(self)
 
@@ -45,8 +51,9 @@ class ListLxdCommand(Command):
     def __init__(self) -> None:
         super().__init__()
 
-    def run_command(self):
-        output = subprocess.run(f"lxc list {self.OUTPUT_TYPE}")
+    def run_command(self, conn: Connection):
+        output = conn.conn.exec_command("hello world")
+        # output = subprocess.run(f"lxc list {self.OUTPUT_TYPE}")
         # json_output = print(f"lxc list --output json")
         print(output)
 
@@ -67,12 +74,9 @@ class BackupLxdCommand(Command):
 
 class Server:
 
-    conn: Connection = None
-    lxd: Lxd = None
+    conn: Connection
+    lxd: Lxd
 
-    def __init__(self, conn: Connection) -> None:
-        self.lxd = self._get_lxd_instance()
+    def __init__(self, conn: Connection, lxd: Lxd) -> None:
         self.conn = conn
-
-    def _get_lxd_instance(self):
-        self.lxd = Lxd()
+        self.lxd = Lxd(conn=self.conn)
