@@ -1,3 +1,11 @@
+from lxdbackup.backup import (
+    BackupLxdCommand,
+    ListNetworksLxdCommand,
+    ListLxdCommand,
+    Orchestrator,
+    Lxd,
+    Server,
+)
 from typing import List
 from pydantic.main import BaseConfig
 from lxdbackup import backup, connection
@@ -14,9 +22,16 @@ def main():
     paramiko = connection.FactoryConnection.get_paramiko_connection(connect_args)
     conn = connection.Connection(conn=paramiko)
     # todo
-    lxd = backup.Lxd(conn=conn)
-    server = backup.Server(conn=conn, lxd=lxd)  # ! todo
-    container_list = server.lxd.command.list_containers()
+    lxd = Lxd(conn=conn)
+    server = Server(lxd=lxd)
+
+    # run a list lxd containers command
+    container_list = server.lxd.run(ListLxdCommand())
+    # run a list lxd networks command
+    network_list = server.lxd.run(ListNetworksLxdCommand())
+    # run a container backup command #! todo
+    backup_result = server.lxd.run(BackupLxdCommand())
+    # container_list = server.lxd.command.list_containers()
     # result: BackupResult = server.lxd.command.backup_all_running_containers(
     #    containers=container_list
     # )
