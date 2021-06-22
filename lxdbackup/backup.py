@@ -1,9 +1,25 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime, time, timedelta
 import subprocess
-from typing import Any, Container, List
+from typing import Any, Container, List, datetime
 from pydantic import BaseModel
+from pydantic.errors import DataclassTypeError
 
 from lxdbackup.connection import Connection
+
+
+@dataclass
+class BackupParams:
+    dst_folder: str = "/tmp/lxdbackup"
+    start_time: datetime = None
+
+
+@dataclass
+class BackupArchive:
+    location: str = "/tmp/lxdbackup"
+    size_gb: int = 20
+    last_backup: datetime = None
 
 
 class Command(ABC):
@@ -41,9 +57,7 @@ class Lxd(Orchestrator):
     conn: Connection
 
     def __init__(self, conn: Connection) -> None:
-        # self.run = Command()
         self.conn = conn
-        # self.containers = self._get_all_containers()
 
     def _get_all_containers(self):
         # run command to get list of all containers
@@ -118,7 +132,12 @@ class BackupObject:
 
 class BackupLxdCommand(Command):
 
+    backup_params: BackupParams
     container_backup_list: List[Container] = None
+
+    def __init__(self, backup_params: BackupParams) -> None:
+        super().__init__()
+        self.backup_params = BackupParams
 
     def backup():
         pass

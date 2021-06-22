@@ -5,6 +5,8 @@ from lxdbackup.backup import (
     Orchestrator,
     Lxd,
     Server,
+    BackupParams,
+    BackupArchive,
 )
 from typing import List
 from pydantic.main import BaseConfig
@@ -30,7 +32,9 @@ def main():
     # run a list lxd networks command
     network_list = server.lxd.run(ListNetworksLxdCommand())
     # run a container backup command #! todo
-    backup_result = server.lxd.run(BackupLxdCommand())
+    backup_result = server.lxd.run(
+        BackupLxdCommand(BackupParams(dst_folder="/tmp", start_time="now"))
+    )
     # container_list = server.lxd.command.list_containers()
     # result: BackupResult = server.lxd.command.backup_all_running_containers(
     #    containers=container_list
