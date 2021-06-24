@@ -24,6 +24,7 @@ class BackupArchive:
 
 class Command(ABC):
     command_type = None
+    OUTPUT_TYPE_JSON = "--output json"
 
     @abstractmethod
     def run_command(
@@ -74,14 +75,16 @@ class Lxd(Orchestrator):
 
 
 class ListLxdCommand(Command):
-    OUTPUT_TYPE = "--output json"
+    LXD_COMMAND: str = "lxc list"
 
     def __init__(self) -> None:
         pass
 
     def run_command(self, conn: Connection):
         #! todo fix this why no output
-        stdin, stdout, stderr = conn.conn.exec_command(f"lxc list {self.OUTPUT_TYPE}")
+        stdin, stdout, stderr = conn.conn.exec_command(
+            f"{self.LXD_COMMAND} {self.OUTPUT_TYPE_JSON}"
+        )
         output = stdout.readlines()
 
         return output
@@ -92,14 +95,14 @@ class ListLxdCommand(Command):
 
 
 class ListNetworksLxdCommand(Command):
-    OUTPUT_TYPE = "--output json"
+    LXD_COMMAND: str = "lxc network list"
 
     def __init__(self) -> None:
         pass
 
     def run_command(self, conn: Connection):
         stdin, stdout, stderr = conn.conn.exec_command(
-            f"lxc network list {self.OUTPUT_TYPE}"
+            f"{self.LXD_COMMAND} {self.OUTPUT_TYPE_JSON}"
         )
         output = stdout.readlines()
 
