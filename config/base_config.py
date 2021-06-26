@@ -1,8 +1,53 @@
 import yaml
 import os
+from enum import Enum, auto
+from dataclasses import dataclass
+import pytest
+
+# from pytest import fixture
+from pytest_cases import fixture
+
+config_file = dict(
+    {
+        "lxd": {"api": {"auth": {"cert": "./client.crt", "key": "./client.key"}}},
+        "credentials": {
+            "username": "root",
+            "password": "egNim3dRR9qATkxKaUA3",
+            "hostname": "10.55.0.66",
+        },
+    }
+)
+
+
+@dataclass
+class ConfigItem:
+    item: str
+    config_file: str
+
+
+@fixture(unpack_into="item")
+def setup_item_test():
+
+    return "username"
 
 
 class BaseConfig:
+    def __init__(self) -> None:
+        pass
+
+    def get_config_item(self, filename, c: ConfigItem):
+        if os.getenv(c.item) is not None:
+            item = os.environ.get(c.item)
+        else:
+            config = self._get_file(filename)
+            item = self._find_item(c.item, config)
+            return item
+
+    def _find_item(self, item, config):
+        for key, value in config.items():
+            if item in value:
+                return value[item]
+
     @staticmethod
     def get_username(filename):
 
@@ -39,9 +84,19 @@ class BaseConfig:
         return HOSTNAME
 
     @staticmethod
-    def _get_file(filename):
+    def get_cert(filename):
+
+        if os.getenv("CERT") is not None:
+            certs = os.environ.get("CERT")
+        else:
+            creds = BaseConfig._get_file(filename)
+
+            HOSTNAME = creds["lxd"]["api"]["certs"]
+
+        return HOSTNAME
+
+    def _get_file(self, filename):
 
         with open(filename) as file:
-            creds = yaml.load(file, Loader=yaml.FullLoader)
-
-        return creds
+            item = yaml.load(file, Loader=yaml.FullLoader)
+            return item

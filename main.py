@@ -1,3 +1,6 @@
+from typing import List
+from pylxd import Client
+
 from lxdbackup.backup import (
     BackupLxdCommand,
     ListNetworksLxdCommand,
@@ -8,17 +11,17 @@ from lxdbackup.backup import (
     BackupParams,
     BackupArchive,
 )
-from typing import List
+
 from pydantic.main import BaseConfig
 from lxdbackup import backup, connection
-from config.base_config import BaseConfig
-import lxdbackup
+from config.base_config import BaseConfig, ConfigItem
 
-FILENAME = ".creds.yml"
-# hostname = "10.55.0.66"
+FILENAME = ".config.yml"
 
 
 def main():
+    # lxd_client = Client()
+    get_base_config()
     username, password, hostname = get_credentials()
     connect_args = get_connect_args(username, password, hostname)
     paramiko = connection.FactoryConnection.get_paramiko_connection(connect_args)
@@ -39,6 +42,12 @@ def main():
     # result: BackupResult = server.lxd.command.backup_all_running_containers(
     #    containers=container_list
     # )
+
+
+def get_base_config():
+    config = BaseConfig().get_config_item(
+        FILENAME, ConfigItem(item="username", config_file=FILENAME)
+    )
 
 
 def get_connect_args(username, password, hostname):
