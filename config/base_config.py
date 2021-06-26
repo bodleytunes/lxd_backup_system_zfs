@@ -4,6 +4,8 @@ from enum import Enum, auto
 from dataclasses import dataclass
 import pytest
 
+import confuse
+
 # from pytest import fixture
 from pytest_cases import fixture
 
@@ -25,26 +27,24 @@ class ConfigItem:
     config_file: str
 
 
-@fixture(unpack_into="item")
-def setup_item_test():
-
-    return "username"
-
-
 class BaseConfig:
-    def __init__(self) -> None:
+
+    config: dict
+
+    def __init__(self, filename) -> None:
+
+        self.filename = filename
         pass
 
-    def get_config_item(self, filename, c: ConfigItem):
-        if os.getenv(c.item) is not None:
-            item = os.environ.get(c.item)
-        else:
-            config = self._get_file(filename)
-            item = self._find_item(c.item, config)
-            return item
+    def get_config_item(self, item):
+
+        config = self._get_file(self.filename)
+        item = self._find_item(item, config)
+        return item
 
     def _find_item(self, item, config):
-        for key, value in config.items():
+
+        for _, value in config.items():
             if item in value:
                 return value[item]
 

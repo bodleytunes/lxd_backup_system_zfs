@@ -13,6 +13,7 @@ from lxdbackup.backup import (
 )
 
 from pydantic.main import BaseConfig
+import confuse
 from lxdbackup import backup, connection
 from config.base_config import BaseConfig, ConfigItem
 
@@ -45,9 +46,15 @@ def main():
 
 
 def get_base_config():
+    """
     config = BaseConfig().get_config_item(
         FILENAME, ConfigItem(item="username", config_file=FILENAME)
     )
+    """
+    config = confuse.Configuration("lxdbackup", __name__)
+    config.set_file(".config.yml")
+    print(config["lxd"].get())
+    print(config["lxd"]["api"]["auth"]["cert"].get())
 
 
 def get_connect_args(username, password, hostname):
