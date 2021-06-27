@@ -1,5 +1,6 @@
 from typing import List
-from pylxd import Client
+from pylxd import Client as Api
+
 
 from lxdbackup.backup import (
     BackupLxdCommand,
@@ -22,53 +23,34 @@ FILENAME = ".config.yml"
 
 def main():
     # lxd_client = Client()
-    get_base_config()
-    username, password, hostname = get_credentials()
-    connect_args = get_connect_args(username, password, hostname)
-    paramiko = connection.FactoryConnection.get_paramiko_connection(connect_args)
-    conn = connection.Connection(conn=paramiko)
-    # todo
-    lxd = Lxd(conn=conn)
-    server = Server(lxd=lxd)
-
-    # run a list lxd containers command
-    container_list = server.lxd.run(ListLxdCommand())
-    # run a list lxd networks command
-    network_list = server.lxd.run(ListNetworksLxdCommand())
-    # run a container backup command #! todo
-    backup_result = server.lxd.run(
-        BackupLxdCommand(BackupParams(dst_folder="/tmp", start_time="now"))
-    )
-    # container_list = server.lxd.command.list_containers()
-    # result: BackupResult = server.lxd.command.backup_all_running_containers(
-    #    containers=container_list
-    # )
+    config = get_base_config()
+    get_api(config)
 
 
 def get_base_config():
-    """
-    config = BaseConfig().get_config_item(
-        FILENAME, ConfigItem(item="username", config_file=FILENAME)
-    )
-    """
+    # use confuse to parse config file
     config = confuse.Configuration("lxdbackup", __name__)
     config.set_file(".config.yml")
-    print(config["lxd"].get())
-    print(config["lxd"]["api"]["auth"]["cert"].get())
+    return config
 
 
-def get_connect_args(username, password, hostname):
-    connect_args = connection.ConnectArgs(
-        hostname=hostname, username=username, password=password
+def get_api(config):
+    api = Api(
+        endpoint=create_endpoint_url(config),
+        verify=False,
+        cert=create_auth(config, "cert"),
     )
-    return connect_args
+    return api
 
 
-def get_credentials():
-    username = BaseConfig.get_username(filename=FILENAME)
-    password = BaseConfig.get_password(filename=FILENAME)
-    hostname = BaseConfig.get_hostname(filename=FILENAME)
-    return username, password, hostname
+def create_endpoint_url(config):
+    prefix = "http://"
+    host = config["lxd"]["api"][0]["endpoint"].get()
+    return f"{prefix}{host}"
+
+
+def create_auth(config, auth_type):
+    return str(config["lxd"]["api"][0]["auth"][auth_type])
 
 
 if __name__ == "__main__":

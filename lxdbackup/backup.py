@@ -5,6 +5,9 @@ import subprocess
 from typing import Any, Container, List
 from pydantic import BaseModel
 from pydantic.errors import DataclassTypeError
+import confuse
+from pylxd import Client as Api
+
 
 from lxdbackup.connection import Connection
 
@@ -56,9 +59,15 @@ class Lxd(Orchestrator):
     containers: List[Container]
     command: Command
     conn: Connection
+    config: confuse.Configuration
+    api: Api
 
-    def __init__(self, conn: Connection) -> None:
+    def __init__(
+        self, conn: Connection, config: confuse.Configuration, api: Api
+    ) -> None:
         self.conn = conn
+        self.config = config
+        self.api = api
 
     def _get_all_containers(self):
         # run command to get list of all containers
