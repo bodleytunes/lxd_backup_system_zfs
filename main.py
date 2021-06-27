@@ -44,7 +44,7 @@ def get_api(config):
 
 
 def create_endpoint_url(config):
-    prefix = "http://"
+    prefix = "https://"
     host = config["lxd"]["api"][0]["endpoint"].get()
     return f"{prefix}{host}"
 
