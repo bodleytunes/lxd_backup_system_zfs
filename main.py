@@ -16,7 +16,7 @@ from lxdbackup.backup import (
 from pydantic.main import BaseConfig
 import confuse
 from lxdbackup import backup, connection
-from config.base_config import BaseConfig, ConfigItem
+from config.base_config import BaseConfig
 
 FILENAME = ".config.yml"
 
@@ -35,22 +35,13 @@ def get_base_config():
 
 
 def get_api(config):
+    cfg = BaseConfig(config)
     api = Api(
-        endpoint=create_endpoint_url(config),
+        endpoint=cfg.get_endpoint_url(),
         verify=False,
-        cert=create_auth(config, "cert"),
+        cert=cfg.get_auth("cert"),
     )
     return api
-
-
-def create_endpoint_url(config):
-    prefix = "https://"
-    host = config["lxd"]["api"][0]["endpoint"].get()
-    return f"{prefix}{host}"
-
-
-def create_auth(config, auth_type):
-    return str(config["lxd"]["api"][0]["auth"][auth_type])
 
 
 if __name__ == "__main__":
