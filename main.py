@@ -2,7 +2,7 @@ from typing import List
 from pylxd import Client as Api
 
 
-from lxdbackup.backup import (
+from lxdbackup.lxd import (
     BackupLxdCommand,
     ListNetworksLxdCommand,
     ListLxdCommand,
@@ -15,7 +15,7 @@ from lxdbackup.backup import (
 
 from pydantic.main import BaseConfig
 import confuse
-from lxdbackup import backup, connection
+from lxdbackup.lxd import Lxd
 from config.base_config import BaseConfig
 
 FILENAME = ".config.yml"
@@ -24,7 +24,8 @@ FILENAME = ".config.yml"
 def main():
     # lxd_client = Client()
     config = get_base_config()
-    get_api(config)
+    api = get_api(config)
+    lxd = Lxd(config=config, api=api)
 
 
 def get_base_config():
@@ -35,12 +36,16 @@ def get_base_config():
 
 
 def get_api(config):
-    cfg = BaseConfig(config)
-    api = Api(
-        endpoint=cfg.get_endpoint_url(),
-        verify=False,
-        cert=cfg.get_auth("cert"),
-    )
+    base_cfg = BaseConfig(config)
+    try:
+        api = Api(
+            endpoint=base_cfg.get_endpoint_url(),
+            verify=False,
+            cert=base_cfg.get_auth("cert"),
+        )
+    except Exception as e:
+        raise (f"Failed to connect {e}")
+
     return api
 
 
