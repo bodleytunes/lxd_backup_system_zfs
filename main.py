@@ -44,7 +44,7 @@ def get_api(config):
             cert=base_cfg.get_auth("cert"),
         )
     except Exception as e:
-        raise (f"Failed to connect {e}")
+        raise ConnectionAbortedError(f"computer says no {e}")
 
     return api
 
