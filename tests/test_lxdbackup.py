@@ -26,5 +26,9 @@ def api(config):
     return api
 
 
-def test_list_containers(api):
-    assert api
+def test_api_ok(api):
+    assert isinstance(Api)
+
+
+# def test_list_containers(api):
+#    assert isinstance(Api)
