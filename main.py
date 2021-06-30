@@ -19,6 +19,7 @@ from lxdbackup.lxd import Lxd
 from config.base_config import BaseConfig
 
 FILENAME = ".config.yml"
+PREFIX = "https://"
 
 
 def main():
@@ -26,17 +27,18 @@ def main():
     config = get_base_config()
     api = get_api(config)
     lxd = Lxd(config=config, api=api)
+    lxd.list_containers()
 
 
-def get_base_config():
+def get_base_config() -> confuse.Configuration:
     # use confuse to parse config file
     config = confuse.Configuration("lxdbackup", __name__)
-    config.set_file(".config.yml")
+    config.set_file(FILENAME)
     return config
 
 
-def get_api(config):
-    base_cfg = BaseConfig(config)
+def get_api(config) -> Api:
+    base_cfg = BaseConfig(config, PREFIX)
     try:
         api = Api(
             endpoint=base_cfg.get_endpoint_url(),
