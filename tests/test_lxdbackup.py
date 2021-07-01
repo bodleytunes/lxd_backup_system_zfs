@@ -14,11 +14,12 @@ from tests.test_baseconfig import config, prefix_https
 
 @pytest.fixture(autouse=True)
 def api(config):
+    cert = ("tests/test_client.crt", "tests/test_client.key")
     try:
         api = Api(
             endpoint="https://10.55.0.21:8443",
             verify=False,
-            cert="tests/test_client.crt",
+            cert=cert,
         )
     except Exception as e:
         raise ConnectionAbortedError(f"computer says no {e}")
@@ -26,9 +27,12 @@ def api(config):
     return api
 
 
+@pytest.mark.tests
 def test_api_ok(api):
-    assert isinstance(Api)
+    assert isinstance(api, Api)
 
 
-# def test_list_containers(api):
-#    assert isinstance(Api)
+# todo
+def test_list_containers(api):
+    containers = api.containers.all()
+    assert isinstance(containers, list)
