@@ -32,7 +32,15 @@ def test_api_ok(api):
     assert isinstance(api, Api)
 
 
-# todo
+@pytest.mark.tests
 def test_list_containers(api):
     containers = api.containers.all()
     assert isinstance(containers, list)
+
+
+@pytest.mark.tests
+def test_backup_container(api, container="test"):
+
+    instance = api.instances.get(container)
+    export = instance.publish(wait=True)
+    assert export == "success"
