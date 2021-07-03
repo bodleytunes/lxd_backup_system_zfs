@@ -30,24 +30,42 @@ class ArgBuilder:
     """
 
     def __init__(self, args: SyncoidArgs) -> None:
-        cmd: str = args.cmd
-        src_dataset: str = args.src_dataset
-        src_mid: str = args.src_mid
-        container: str = args.container
-        user: str = args.user
-        dst_host: str = args.dst_host
-        dst_dataset: str = args.dst_dataset
-        dst_mid: str = args.dst_mid
-        dst_container: str = args.dst_container
-        mbuffer_size: int = args.mbuffer_size
-        pv_options: str = args.pv_options
-        compression: str = args.compression
-        other_opts: str = args.other_opts
 
-        arg_string: str = self._build_args
+        self.syncoid_args: SyncoidArgs = args
+        self.src: str = self._build_src()
+        self.dst: str = self._build_dst()
+        self.params: str = self._build_params()
+        self.arg_string: str = self._build_args()
 
         pass
 
-    def _build_args(self):
+    def _build_src(self):
+        return str(
+            f"{self.syncoid_args.cmd} {self.syncoid_args.src_dataset}{self.syncoid_args.src_mid}{self.syncoid_args.container}"
+        )
 
-        return str(f"{self.cmd}{self.src_dataset}")
+    def _build_dst(self):
+        return str(
+            f"{self.syncoid_args.user}@{self.syncoid_args.dst_host}:{self.syncoid_args.dst_dataset}{self.syncoid_args.dst_mid}/{self.syncoid_args.dst_container}"
+        )
+
+    def _build_params(self):
+        return str(
+            f"--mbuffer-size={self.syncoid_args.mbuffer_size}M --pv-options={self.syncoid_args.pv_options} --compress={self.syncoid_args.compression} {self.syncoid_args.other_opts}"
+        )
+
+    def _build_args(self):
+        return str(f"{self.src} {self.dst} {self.params}")
+
+
+class CommandRunner:
+    def __init__(self, arg_string: str) -> None:
+
+        self.arg_string = arg_string
+
+        pass
+
+    def backup(self):
+        pass
+        # cmd process run
+        # run self.arg_string

@@ -1,5 +1,7 @@
 from typing import List
 from pylxd import Client as Api
+from pydantic.main import BaseConfig
+import confuse
 
 
 from lxdbackup.lxd import (
@@ -12,11 +14,9 @@ from lxdbackup.lxd import (
     BackupParams,
     BackupArchive,
 )
-
-from pydantic.main import BaseConfig
-import confuse
-from lxdbackup.lxd import Lxd
+from config.util import SyncoidArgs, ArgBuilder
 from config.base_config import BaseConfig
+from lxdbackup.lxd import Lxd
 
 FILENAME = ".config.yml"
 PREFIX = "https://"
@@ -24,10 +24,14 @@ PREFIX = "https://"
 
 def main():
     # lxd_client = Client()
-    config = get_base_config()
-    api = get_api(config)
-    lxd = Lxd(config=config, api=api)
-    lxd.list_containers()
+    # config = get_base_config()
+    # api = get_api(config)
+    # lxd = Lxd(config=config, api=api)
+    # lxd.list_containers()
+    ###
+    args = SyncoidArgs()
+    built_args = ArgBuilder(args=args)
+    print(built_args)
 
 
 def get_base_config() -> confuse.Configuration:
