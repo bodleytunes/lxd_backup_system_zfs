@@ -11,6 +11,7 @@ paramiko = "^2.7.2"
 PyYAML = "^5.4.1"
 pylxd = "^2.3.0"
 confuse = "^1.4.0"
+zfslib = "^0.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

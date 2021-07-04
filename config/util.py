@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
 from abc import ABC
+from typing import Any, List
+
+from zfslib import zfslib as zfs
 
 
 class CmdArgs:
@@ -8,8 +11,51 @@ class CmdArgs:
 
 
 @dataclass
+class ZfsDataset:
+    full_path: str
+    split_path: list
+
+
+@dataclass
+class ZfsPool:
+    name: str
+    zfs_datasets: List[ZfsDataset]
+
+
+@dataclass
+class ZfsDetails:
+    host: str
+    zfs_pools: List[ZfsPool]
+
+
+class ZfsUtil:
+    def __init__(self, host: str) -> None:
+        self.host = host
+        self._get_conn()
+        self._get_poolset()
+
+        self.datasets: List = list()
+        pass
+
+    def _get_conn(self):
+        self.conn = zfs.Connection(host=self.host)
+
+    def _get_poolset(self):
+        self.poolset = self.conn.load_poolset()
+
+    def get_pool_names(self):
+        for p in self.poolset:
+            print(p.name)
+
+    def get_pool_datasets(self):
+        for p in self.poolset:
+            self.datasets.append(p.get_all_datasets())
+        pass
+
+
+@dataclass
 class SyncoidArgs(CmdArgs):
-    cmd = "syncoid"
+    CMD = "syncoid"
     src_dataset = "zpool1"
     src_mid = "/containers/"
     container = "gitea"
@@ -41,7 +87,7 @@ class ArgBuilder:
 
     def _build_src(self):
         return str(
-            f"{self.syncoid_args.cmd} {self.syncoid_args.src_dataset}{self.syncoid_args.src_mid}{self.syncoid_args.container}"
+            f"{self.syncoid_args.CMD} {self.syncoid_args.src_dataset}{self.syncoid_args.src_mid}{self.syncoid_args.container}"
         )
 
     def _build_dst(self):
@@ -62,6 +108,7 @@ class CommandRunner:
     def __init__(self, arg_string: str) -> None:
 
         self.arg_string = arg_string
+        self.log_output
 
         pass
 

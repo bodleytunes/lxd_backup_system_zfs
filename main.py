@@ -14,7 +14,8 @@ from lxdbackup.lxd import (
     BackupParams,
     BackupArchive,
 )
-from config.util import SyncoidArgs, ArgBuilder
+from config.util import SyncoidArgs, ArgBuilder, ZfsUtil
+
 from config.base_config import BaseConfig
 from lxdbackup.lxd import Lxd
 
@@ -29,9 +30,14 @@ def main():
     # lxd = Lxd(config=config, api=api)
     # lxd.list_containers()
     ###
+    """
     args = SyncoidArgs()
     built_args = ArgBuilder(args=args)
     print(built_args)
+    """
+    z = ZfsUtil(host="p21")
+    z.get_pool_names()
+    z.get_pool_datasets()
 
 
 def get_base_config() -> confuse.Configuration:
