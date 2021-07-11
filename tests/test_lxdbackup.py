@@ -11,6 +11,8 @@ import confuse
 from config.base_config import BaseConfig
 from tests.test_baseconfig import config, prefix_https
 
+CONTAINER = "mattermost"
+
 
 @pytest.fixture(autouse=True)
 def api(config):
@@ -27,6 +29,11 @@ def api(config):
     return api
 
 
+@pytest.fixture(autouse=True)
+def container():
+    return CONTAINER
+
+
 @pytest.mark.tests
 def test_api_ok(api):
     assert isinstance(api, Api)
@@ -39,8 +46,6 @@ def test_list_containers(api):
 
 
 @pytest.mark.tests
-def test_backup_container(api, container="test"):
-
+def test_get_container(api, container):
     instance = api.instances.get(container)
-    export = instance.publish(wait=True)
-    assert export == "success"
+    assert instance.name == container
