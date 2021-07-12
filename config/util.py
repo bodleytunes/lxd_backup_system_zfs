@@ -31,6 +31,7 @@ class ZfsDetails:
 class ZfsUtil:
     def __init__(self, host: str) -> None:
         self.host = host
+        # setups / initiations
         self._get_conn()
         self._get_poolset()
 
@@ -38,6 +39,9 @@ class ZfsUtil:
         self._get_pool_datasets()
         self._get_pool_dataset_paths()
         self._get_pool_dataset_names()
+        self._get_pool_lxd_dataset_names()
+        self._get_pool_lxd_dataset_paths()
+
         pass
 
     def _get_conn(self):
@@ -60,9 +64,20 @@ class ZfsUtil:
         self.all_dataset_names = [i.name for d in self.datasets for i in d]
 
     def _get_pool_lxd_dataset_names(self):
-        # todo
         self.all_lxd_dataset_names = [
-            i.name for d in self.datasets for i in d if "lxd" in i.name
+            i.name
+            for d in self.datasets
+            for i in d
+            if "lxd/containers" in i.path and i.name != "containers"
+        ]
+        print(self.all_lxd_dataset_names)
+
+    def _get_pool_lxd_dataset_paths(self):
+        self.all_lxd_dataset_paths = [
+            i.path
+            for d in self.datasets
+            for i in d
+            if "lxd/containers" in i.path and i.name != "containers"
         ]
 
     def print_dataset_names(self):
@@ -74,7 +89,7 @@ class ZfsUtil:
             print(f"dataset path:  {p}")
 
     def get_dataset_from_container_name(self, container_name: str):
-        if container_name in self.all_dataset_paths:
+        if container_name in self.all_lxd_dataset_paths:
             return True
         else:
             return False
