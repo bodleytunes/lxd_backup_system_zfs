@@ -37,7 +37,10 @@ def main():
     """
     z = ZfsUtil(host="p21")
     z.get_pool_names()
-    z.get_pool_datasets()
+    result = z.get_dataset_from_container_name("mattermost")
+    print(result)
+    z.print_dataset_names()
+    z.print_dataset_paths()
 
 
 def get_base_config() -> confuse.Configuration:
