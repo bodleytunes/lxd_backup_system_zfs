@@ -136,3 +136,11 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+.config.yml
+.test_config.yml
+tests/.test_config.yml
+client.crt
+client.key
+lxdbackup/helpers.py
+.vscode/
