@@ -140,6 +140,8 @@ cython_debug/
 .config.yml
 .test_config.yml
 tests/.test_config.yml
+tests/test_*.crt
+tests/test_*.key
 client.crt
 client.key
 lxdbackup/helpers.py
