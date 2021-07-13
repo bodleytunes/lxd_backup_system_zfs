@@ -8,13 +8,17 @@ from lxdbackup.lxd import (
     BackupLxdCommand,
     ListNetworksLxdCommand,
     ListLxdCommand,
+    LxdBackup,
     Orchestrator,
     Lxd,
     Server,
     BackupParams,
     BackupArchive,
+    LxdBackupSource,
+    LxdBackupDestination,
 )
-from config.util import SyncoidArgs, ArgBuilder, ZfsUtil
+from lxdbackup.zfs import ZfsUtil
+from lxdbackup.backup_commands import ArgBuilder, CommandRunner, SyncoidArgs
 
 from config.base_config import BaseConfig
 from lxdbackup.lxd import Lxd
@@ -30,17 +34,33 @@ def main():
     # lxd = Lxd(config=config, api=api)
     # lxd.list_containers()
     ###
-    """
     args = SyncoidArgs()
     built_args = ArgBuilder(args=args)
     print(built_args)
-    """
-    z = ZfsUtil(host="p21")
-    z.get_pool_names()
+
+    z_src = ZfsUtil(host="p21")
+    z_src.get_pool_names()
     result = z.get_dataset_from_container_name("mattermost")
     print(result)
-    z.print_dataset_names()
-    z.print_dataset_paths()
+    z_src.print_dataset_names()
+    z_src.print_dataset_paths()
+    z_src.get_path("mattermost")
+
+    z_dst = ZfsUtil(host="p20")
+    z_dst.set_destination_container("mattermost")
+    # todo pseudo code below
+    l = LxdBackup(src_host="p21", dst_host="p21")
+    l.set_backup_src(
+        path=LxdBackupSource(
+            backup_source_host="p21",
+            selected_backup_source_dataset=z_src.get_path("mattermost"),
+        ),
+    )
+    l.set_backup_dst(path=LxdBackupDestination(
+        backup_destination_host="p20",
+        selected_backup_destination_dataset=z_dst.set_path("mattermost")
+    ))
+    l.run_backup(cmd=built_args)
 
 
 def get_base_config() -> confuse.Configuration:
