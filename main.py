@@ -5,23 +5,14 @@ import confuse
 
 
 from lxdbackup.lxd import (
-    BackupLxdCommand,
-    ListNetworksLxdCommand,
-    ListLxdCommand,
     LxdBackup,
-    Orchestrator,
-    Lxd,
-    Server,
-    BackupParams,
-    BackupArchive,
     LxdBackupSource,
     LxdBackupDestination,
 )
 from lxdbackup.zfs import ZfsUtil
-from lxdbackup.backup_commands import ArgBuilder, CommandRunner, SyncoidArgs
+from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs
 
 from config.base_config import BaseConfig
-from lxdbackup.lxd import Lxd
 
 FILENAME = ".config.yml"
 PREFIX = "https://"
@@ -34,20 +25,20 @@ def main():
     # lxd = Lxd(config=config, api=api)
     # lxd.list_containers()
     ###
-    args = SyncoidArgs()
+
+    z_src = ZfsUtil(host="p21")
+    z_src.set_source_container("mattermost")
+
+    z_dst = ZfsUtil(host="p21")
+    z_dst.set_destination_container("mattermost-copy")
+
+    args = SyncoidArgs(
+        zfs_source_path=z_src.source_container_path,
+        zfs_destination_path=z_dst.destination_container_path,
+    )
     built_args = ArgBuilder(args=args)
     print(built_args)
 
-    z_src = ZfsUtil(host="p21")
-    z_src.get_pool_names()
-    result = z.get_dataset_from_container_name("mattermost")
-    print(result)
-    z_src.print_dataset_names()
-    z_src.print_dataset_paths()
-    z_src.get_path("mattermost")
-
-    z_dst = ZfsUtil(host="p20")
-    z_dst.set_destination_container("mattermost")
     # todo pseudo code below
     l = LxdBackup(src_host="p21", dst_host="p21")
     l.set_backup_src(
@@ -56,10 +47,12 @@ def main():
             selected_backup_source_dataset=z_src.get_path("mattermost"),
         ),
     )
-    l.set_backup_dst(path=LxdBackupDestination(
-        backup_destination_host="p20",
-        selected_backup_destination_dataset=z_dst.set_path("mattermost")
-    ))
+    l.set_backup_dst(
+        path=LxdBackupDestination(
+            backup_destination_host="p20",
+            selected_backup_destination_dataset=z_dst.set_path("mattermost"),
+        )
+    )
     l.run_backup(cmd=built_args)
 
 

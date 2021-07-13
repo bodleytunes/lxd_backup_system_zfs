@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 
 from abc import ABC
 from typing import Any, List
@@ -37,6 +38,7 @@ class ZfsUtil:
         self._get_pool_dataset_names()
         self._get_pool_lxd_dataset_names()
         self._get_pool_lxd_dataset_paths()
+        self._set_dataset_path()
 
         pass
 
@@ -84,8 +86,23 @@ class ZfsUtil:
         for p in self.all_lxd_dataset_paths:
             print(f"dataset path:  {p}")
 
-    def get_dataset_from_container_name(self, container_name: str):
-        if container_name in self.all_lxd_dataset_paths:
-            return True
-        else:
-            return False
+    def set_source_container(self, container_name: str):
+        for path in self.all_lxd_dataset_paths:
+            if container_name in path:
+                self.source_container_path = path
+
+    def set_destination_container(self, container_name: str):
+        self.destination_container_path = str(
+            f"{self.lxd_dataset_path}/{container_name}"
+        )
+        pass
+
+    # todo
+
+    def _set_dataset_path(self):
+        if len(self.all_lxd_dataset_paths) > 0:
+            self.lxd_dataset_path = self._split_path(self.all_lxd_dataset_paths[0])
+
+    def _split_path(self, dataset_path):
+        component_paths = os.path.split(dataset_path)
+        return component_paths[0]
