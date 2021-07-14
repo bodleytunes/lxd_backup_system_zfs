@@ -11,6 +11,7 @@ from lxdbackup.lxd import (
 )
 from lxdbackup.zfs import ZfsUtil
 from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs, CommandRunner
+from lxdbackup.backup_logs import Log
 
 from config.base_config import BaseConfig
 
@@ -20,44 +21,50 @@ PREFIX = "https://"
 
 def main():
 
-    z_src = ZfsUtil(host="p21")
-    z_src.set_source_container("mattermost")
+    z_src = setup_source()
+    z_dst = setup_dest()
 
-    z_dst = ZfsUtil(host="p21")
-    z_dst.set_destination_container("mattermost-copy")
+    args = build_args(z_src, z_dst)
+    cmd = ArgBuilder(args=args)
+    run = CommandRunner(cmd.arg_string)
+    # run backup
+    # todo if host is not local running host, then ssh
+    # todo: change backup.yaml in lxd to suit new storage
+    # todo: lxd mount
+    # todo: lxd import
+    run.backup()
+    print(run.result)
+    logging(run)
 
+
+def logging(run):
+    log = Log()
+    log(run.result["stdout"], run.result["stderr"])
+
+
+def build_args(z_src, z_dst):
     args = SyncoidArgs(
+        src_host=z_src.host,
+        src_user=z_src.user,
+        dst_host=z_dst.host,
+        dst_user=z_dst.user,
         zfs_source_path=z_src.source_container_path,
         zfs_destination_path=z_dst.destination_container_path,
     )
-    cmd = ArgBuilder(args=args)
-    print(cmd.arg_string)
-    # now subprocess.run the above string.
 
-    # todo pseudo code below
-    run = CommandRunner(cmd.arg_string)
-    run.backup()
+    return args
 
 
-def get_base_config() -> confuse.Configuration:
-    # use confuse to parse config file
-    config = confuse.Configuration("lxdbackup", __name__)
-    config.set_file(FILENAME)
-    return config
+def setup_dest():
+    z_dst = ZfsUtil(host="p21", user="root")
+    z_dst.set_destination_container("mattermost-copy")
+    return z_dst
 
 
-def get_api(config) -> Api:
-    base_cfg = BaseConfig(config, PREFIX)
-    try:
-        api = Api(
-            endpoint=base_cfg.get_endpoint_url(),
-            verify=False,
-            cert=base_cfg.get_auth("cert"),
-        )
-    except Exception as e:
-        raise ConnectionAbortedError(f"computer says no {e}")
-
-    return api
+def setup_source():
+    z_src = ZfsUtil(host="p21", user="root")
+    z_src.set_source_container("mattermost")
+    return z_src
 
 
 if __name__ == "__main__":

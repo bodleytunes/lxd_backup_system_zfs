@@ -1,33 +1,14 @@
-from dataclasses import dataclass
 import os
 
-from abc import ABC
-from typing import Any, List
+from typing import List
 
 from zfslib import zfslib as zfs
 
 
-@dataclass
-class ZfsDataset:
-    full_path: str
-    split_path: list
-
-
-@dataclass
-class ZfsPool:
-    name: str
-    zfs_datasets: List[ZfsDataset]
-
-
-@dataclass
-class ZfsDetails:
-    host: str
-    zfs_pools: List[ZfsPool]
-
-
 class ZfsUtil:
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str, user: str) -> None:
         self.host = host
+        self.user = user
         # setups / initiations
         self._get_conn()
         self._get_poolset()
@@ -90,14 +71,12 @@ class ZfsUtil:
         for path in self.all_lxd_dataset_paths:
             if container_name in path:
                 self.source_container_path = path
+                return
 
     def set_destination_container(self, container_name: str):
         self.destination_container_path = str(
             f"{self.lxd_dataset_path}/{container_name}"
         )
-        pass
-
-    # todo
 
     def _set_dataset_path(self):
         if len(self.all_lxd_dataset_paths) > 0:

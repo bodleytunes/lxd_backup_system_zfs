@@ -10,9 +10,11 @@ class CmdArgs:
 
 @dataclass
 class SyncoidArgs(CmdArgs):
-    CMD: str = "syncoid"
+    CMD: str = "/usr/sbin/syncoid"
 
-    user: str = "root"
+    src_user: str = "root"
+    dst_user: str = "root"
+    src_host: str = "p21"
     dst_host: str = "p21"
 
     zfs_source_path: Optional[str] = None
@@ -21,7 +23,7 @@ class SyncoidArgs(CmdArgs):
     mbuffer_size: int = 128
     pv_options: str = "-b"
     compression: str = "zstd-fast"
-    other_opts: str = "--no-stream --no-sync-snap --debug"
+    other_opts: str = "--no-stream --debug"
 
 
 class ArgBuilder:
@@ -40,11 +42,13 @@ class ArgBuilder:
         pass
 
     def _build_src(self):
-        return str(f"{self.syncoid_args.CMD} {self.syncoid_args.zfs_source_path}")
+        return str(
+            f"{self.syncoid_args.CMD} {self.syncoid_args.src_user}@{self.syncoid_args.src_host}:{self.syncoid_args.zfs_source_path}"
+        )
 
     def _build_dst(self):
         return str(
-            f"{self.syncoid_args.user}@{self.syncoid_args.dst_host}:{self.syncoid_args.zfs_destination_path}"
+            f"{self.syncoid_args.dst_user}@{self.syncoid_args.dst_host}:{self.syncoid_args.zfs_destination_path}"
         )
 
     def _build_params(self):
@@ -66,9 +70,9 @@ class CommandRunner:
 
     def _create_process(self) -> None:
         self.process = subprocess.Popen(
-            self.arg_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            self.arg_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
     def backup(self) -> dict:
-        stdout, stderr = self.process.communicate()
-        return {"stdout": stdout, "stderr": stderr}
+        out, err = self.process.communicate()
+        self.result = {"stdout": out, "stderr": err}
