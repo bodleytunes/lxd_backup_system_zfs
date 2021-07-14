@@ -10,7 +10,7 @@ from lxdbackup.lxd import (
     LxdBackupDestination,
 )
 from lxdbackup.zfs import ZfsUtil
-from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs
+from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs, CommandRunner
 
 from config.base_config import BaseConfig
 
@@ -19,12 +19,6 @@ PREFIX = "https://"
 
 
 def main():
-    # lxd_client = Client()
-    # config = get_base_config()
-    # api = get_api(config)
-    # lxd = Lxd(config=config, api=api)
-    # lxd.list_containers()
-    ###
 
     z_src = ZfsUtil(host="p21")
     z_src.set_source_container("mattermost")
@@ -36,24 +30,13 @@ def main():
         zfs_source_path=z_src.source_container_path,
         zfs_destination_path=z_dst.destination_container_path,
     )
-    built_args = ArgBuilder(args=args)
-    print(built_args)
+    cmd = ArgBuilder(args=args)
+    print(cmd.arg_string)
+    # now subprocess.run the above string.
 
     # todo pseudo code below
-    l = LxdBackup(src_host="p21", dst_host="p21")
-    l.set_backup_src(
-        path=LxdBackupSource(
-            backup_source_host="p21",
-            selected_backup_source_dataset=z_src.get_path("mattermost"),
-        ),
-    )
-    l.set_backup_dst(
-        path=LxdBackupDestination(
-            backup_destination_host="p20",
-            selected_backup_destination_dataset=z_dst.set_path("mattermost"),
-        )
-    )
-    l.run_backup(cmd=built_args)
+    run = CommandRunner(cmd.arg_string)
+    run.backup()
 
 
 def get_base_config() -> confuse.Configuration:

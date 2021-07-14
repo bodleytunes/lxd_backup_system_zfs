@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+import subprocess
+
 
 class CmdArgs:
     pass
@@ -58,11 +60,15 @@ class CommandRunner:
     def __init__(self, arg_string: str) -> None:
 
         self.arg_string = arg_string
-        self.log_output
+        self._create_process()
 
         pass
 
-    def backup(self):
-        pass
-        # cmd process run
-        # run self.arg_string
+    def _create_process(self) -> None:
+        self.process = subprocess.Popen(
+            self.arg_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+    def backup(self) -> dict:
+        stdout, stderr = self.process.communicate()
+        return {"stdout": stdout, "stderr": stderr}
