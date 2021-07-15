@@ -3,6 +3,7 @@ import logging
 
 class Log:
     def __init__(self) -> None:
+        self._setup()
         pass
 
     def _setup(self):

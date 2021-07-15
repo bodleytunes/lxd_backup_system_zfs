@@ -9,6 +9,7 @@ from lxdbackup.lxd import (
     LxdBackupSource,
     LxdBackupDestination,
 )
+
 from lxdbackup.zfs import ZfsUtil
 from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs, CommandRunner
 from lxdbackup.backup_logs import Log
@@ -28,18 +29,23 @@ def main():
     cmd = ArgBuilder(args=args)
     run = CommandRunner(cmd.arg_string)
     # run backup
-    # todo if host is not local running host, then ssh
-    # todo: change backup.yaml in lxd to suit new storage
-    # todo: lxd mount
+    # todo: if host is not local running host, then ssh via paramiko and then run commands locally
+    # todo: change backup.yaml file in mounted lxd to suit new storage pools and location
+    # todo: lxd unmount
     # todo: lxd import
+    # todo: live monitor of process output, threading, asyncio etc
+    # todo: run all including syncoid in a bundled docker container or just run from docker container on the source
+    # host by default
     run.backup()
     print(run.result)
     logging(run)
 
+    # todo mounter
+
 
 def logging(run):
     log = Log()
-    log(run.result["stdout"], run.result["stderr"])
+    log.log(run.result["stdout"], run.result["stderr"])
 
 
 def build_args(z_src, z_dst):
