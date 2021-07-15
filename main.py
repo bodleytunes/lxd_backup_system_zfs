@@ -1,4 +1,5 @@
 from typing import List
+import asyncio
 from pylxd import Client as Api
 from pydantic.main import BaseConfig
 import confuse
@@ -28,6 +29,7 @@ def main():
     args = build_args(z_src, z_dst)
     cmd = ArgBuilder(args=args)
     run = CommandRunner(cmd.arg_string)
+    do_backup(run)
     # run backup
     # todo: if host is not local running host, then ssh via paramiko and then run commands locally
     # todo: change backup.yaml file in mounted lxd to suit new storage pools and location
@@ -36,11 +38,17 @@ def main():
     # todo: live monitor of process output, threading, asyncio etc
     # todo: run all including syncoid in a bundled docker container or just run from docker container on the source
     # host by default
-    run.backup()
-    print(run.result)
-    logging(run)
+    # run.backup()
+    # print(run.result)
+    # logging(run)
+    # asyncio
 
-    # todo mounter
+
+def do_backup(run):
+    # loop = asyncio.get_event_loop()
+    result = asyncio.run(run.backup())
+    # print(result)
+    # loop.close()
 
 
 def logging(run):

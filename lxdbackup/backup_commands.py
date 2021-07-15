@@ -1,5 +1,8 @@
+import sys
 from dataclasses import dataclass
 from typing import Optional
+import asyncio
+
 
 import subprocess
 
@@ -64,15 +67,47 @@ class CommandRunner:
     def __init__(self, arg_string: str) -> None:
 
         self.arg_string = arg_string
-        self._create_process()
+        # self._create_process()
 
         pass
 
-    def _create_process(self) -> None:
-        self.process = subprocess.Popen(
-            self.arg_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    async def backup(self) -> None:
+        # self.process = subprocess.Popen(
+        #    self.arg_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        # )
+
+        self.process = await asyncio.create_subprocess_shell(
+            self.arg_string,
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
         )
 
-    def backup(self) -> dict:
-        out, err = self.process.communicate()
-        self.result = {"stdout": out, "stderr": err}
+        # stdout, stderr = await self.process.communicate()
+
+        # read child's stdout/stderr concurrently (capture and display)
+        try:
+            stdout, stderr = asyncio.gather(
+                self.read_stream_and_display(
+                    self.process.stdout, sys.stdout.buffer.write
+                ),
+                # read_stream_and_display(self.process.stderr, sys.stderr.buffer.write),
+            )
+        except Exception:
+            self.process.kill()
+            raise
+        finally:
+            # wait for the process to exit
+            rc = await self.process.wait()
+
+        return rc, stdout, stderr
+
+    def read_stream_and_display(self, stream, display):
+        """Read from stream line by line until EOF, display, and capture the lines."""
+        output = []
+        while True:
+            line = yield from stream.readline()
+            if not line:
+                break
+            output.append(line)
+            display(line)  # assume it doesn't block
+        return b"".join(output)
