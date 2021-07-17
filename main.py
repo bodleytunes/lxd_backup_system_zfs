@@ -1,7 +1,9 @@
 from typing import List
+from enum import Enum, auto
 import asyncio
 from pylxd import Client as Api
 from pydantic.main import BaseConfig
+from dataclasses import dataclass
 import confuse
 
 
@@ -21,15 +23,31 @@ FILENAME = ".config.yml"
 PREFIX = "https://"
 
 
-def main():
+@dataclass
+class CopyParams:
+    src_host: str
+    src_host_user: str
+    dst_host: str
+    dst_host_user: str
 
-    z_src = setup_source()
-    z_dst = setup_dest()
+
+def main():
+    copy_params = build_copy_params()
+
+    z_src = setup_source(copy_params)
+    z_dst = setup_dest(copy_params)
 
     args = build_args(z_src, z_dst)
     cmd = ArgBuilder(args=args)
     run = CommandRunner(cmd.arg_string)
     do_backup(run)
+
+
+def build_copy_params():
+    copy_params = CopyParams(
+        src_host="p21", src_host_user="root", dst_host="p21", dst_host_user="root"
+    )
+    return copy_params
     # run backup
     # todo: if host is not local running host, then ssh via paramiko and then run commands locally
     # todo: change backup.yaml file in mounted lxd to suit new storage pools and location
@@ -69,15 +87,15 @@ def build_args(z_src, z_dst):
     return args
 
 
-def setup_dest():
-    z_dst = ZfsUtil(host="p21", user="root")
-    z_dst.set_destination_container("mattermost-copy")
+def setup_dest(copy_params):
+    z_dst = ZfsUtil(host=copy_params.src_host, user=copy_params.src_host_user)
+    z_dst.set_destination_container(copy_params.dst_host_container)
     return z_dst
 
 
-def setup_source():
-    z_src = ZfsUtil(host="p21", user="root")
-    z_src.set_source_container("mattermost")
+def setup_source(copy_params):
+    z_src = ZfsUtil(host=copy_params.dst_host, user=copy_params.dst_host_user)
+    z_src.set_source_container(copy_params.dst_host_container)
     return z_src
 
 

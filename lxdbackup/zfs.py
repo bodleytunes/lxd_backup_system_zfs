@@ -142,3 +142,8 @@ class BackupFile:
 
     def modify_backup_file():
         pass
+
+    def modify_pool_source():
+        pass
+
+    def modify_pool_name():
