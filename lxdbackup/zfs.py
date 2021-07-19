@@ -23,7 +23,6 @@ class ZfsUtil:
         self._get_pool_lxd_dataset_mounts()
         self._set_mount_paths()
 
-
         pass
 
     def _get_conn(self):
@@ -92,6 +91,12 @@ class ZfsUtil:
     def _set_dataset_path(self):
         if len(self.all_lxd_dataset_paths) > 0:
             self.lxd_dataset_path = self._split_path(self.all_lxd_dataset_paths[0])
+        if len(self.all_dataset_paths) > 0:
+            self.lxd_tmp_path = self._split_path(self.all_dataset_paths[0])
+            self.lxd_dataset_path = self._create_new_lxd_dataset()
+
+    def _create_new_lxd_dataset(self):
+        return str(f"{self.lxd_tmp_path}/containers")
 
     def _set_mount_paths(self):
         if len(self.all_lxd_dataset_mountpoints) > 0:
@@ -147,3 +152,4 @@ class BackupFile:
         pass
 
     def modify_pool_name():
+        pass
