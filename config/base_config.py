@@ -16,6 +16,8 @@ class BackupConfig:
     def __init__(self, config_file) -> None:
         self.config = self._get_base_config(config_file)
         self.lxd = self.config.get()
+        self._set_backup_jobs()
+
         pass
 
     def _get_base_config(self, config_file):
@@ -24,9 +26,12 @@ class BackupConfig:
         config.set_file(config_file)  # set the specific config file
         return config
 
-    def get_backup_jobs(self) -> Dict:
+    def _set_backup_jobs(self):
         cfg = self.config.get()
-        return cfg["lxd"]["backup"]["jobs"]
+        self.backup_jobs = cfg["lxd"]["backup"]["jobs"]
+
+    def get_backup_jobs(self):
+        return self.backup_jobs
 
     def get_job_containers(self, job) -> Dict:
         return self.config["lxd"]["backup"][job]["containers"]
