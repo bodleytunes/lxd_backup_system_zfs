@@ -11,6 +11,7 @@ from lxdbackup.lxd import (
     LxdBackupSource,
     LxdBackupDestination,
 )
+from lxdbackup.job import Job
 
 from lxdbackup.zfs import ZfsUtil
 from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs, CommandRunner
@@ -44,7 +45,9 @@ def main():
     # JobRunner
 
     # configurator
-    jobs, job_containers = get_configuration_file()
+    bc = get_configuration_file()
+    # get jobs
+    jobs, job_containers = get_jobs(bc)
 
     # job runner
     for job in jobs:
@@ -53,7 +56,10 @@ def main():
 
 # job runner
 def run_single_job(job):
-    loop_containers_in_job(job)
+    for container in job["containers"]:
+        container_copy_params = get_container_copy_params(job, container)
+        # send to backup pipeline
+        send_container_to_backup(container_copy_params)
 
 
 def send_container_to_backup(container_copy_params):
@@ -72,25 +78,20 @@ def src_dst_creator(copy_params):
     return z_src, z_dst
 
 
-# configurator
+# Job(BackupConfig)
 def get_configuration_file():
     bc = BackupConfig(CONFIG_FILENAME)
-    # get jobs def
-    jobs = bc.backup_jobs
-    # get job containers def
-    job_containers = bc.get_job_containers(0)
-    return jobs, job_containers
+
+
+def get_jobs(bc):
+    job = Job(bc)
+    return job.jobs, job.job_containers
 
 
 # containerLooper
-def loop_containers_in_job(job):
-    for container in job["containers"]:
-        container_copy_params = get_container_copy_params(job, container)
-        # send to backup pipeline
-        send_container_to_backup(container_copy_params)
 
 
-# param builder
+# Builder
 def get_container_copy_params(job, container):
     copy_params = CopyParams(
         src_container=container["name"],
@@ -116,7 +117,7 @@ def get_container_copy_params(job, container):
     # asyncio
 
 
-# job runner
+# Runner
 def do_backup(run):
     # loop = asyncio.get_event_loop()
     result = asyncio.run(run.backup())

@@ -3,6 +3,7 @@ import os
 from typing import List
 
 from zfslib import zfslib as zfs
+from shared import Utils
 
 
 class ZfsUtil:
@@ -90,9 +91,9 @@ class ZfsUtil:
 
     def _set_dataset_path(self):
         if len(self.all_lxd_dataset_paths) > 0:
-            self.lxd_dataset_path = self._split_path(self.all_lxd_dataset_paths[0])
+            self.lxd_dataset_path = Utils._split_path(self.all_lxd_dataset_paths[0])
         if len(self.all_dataset_paths) > 0:
-            self.lxd_tmp_path = self._split_path(self.all_dataset_paths[0])
+            self.lxd_tmp_path = Utils._split_path(self.all_dataset_paths[0])
             self.lxd_dataset_path = self._create_new_lxd_dataset()
 
     def _create_new_lxd_dataset(self):
@@ -101,7 +102,7 @@ class ZfsUtil:
     def _set_mount_paths(self):
         if len(self.all_lxd_dataset_mountpoints) > 0:
             all_lxd_mount_paths = [
-                self._split_path(mount)
+                Utils._split_path(mount)
                 for mount in self.all_lxd_dataset_mountpoints
                 if mount != "none"
             ]
@@ -116,10 +117,6 @@ class ZfsUtil:
 
     def _set_zfs_mounts(self):
         pass
-
-    def _split_path(self, dataset_path):
-        component_paths = os.path.split(dataset_path)
-        return component_paths[0]
 
 
 class Mounter:
