@@ -16,35 +16,20 @@ from lxdbackup.job import Job
 from lxdbackup.zfs import ZfsUtil
 from lxdbackup.backup_commands import ArgBuilder, SyncoidArgs, CommandRunner
 from lxdbackup.backup_logs import Log
+from lxdbackup.copy_params import CopyParams
 
 from config.base_config import BackupConfig
 
+
 CONFIG_FILENAME = ".config.yml"
-PREFIX = "https://"
-SRC_HOST = "lm2"
-SRC_HOST_USER = "root"
-SRC_CONTAINER = "mattermost"
-DST_HOST = "p21"
-DST_HOST_USER = "root"
-DST_CONTAINER = "mattermost-copy"
-
-
-@dataclass
-class CopyParams:
-    src_host: str
-    src_host_user: str
-    src_container: str
-    dst_host: str
-    dst_host_user: str
-    dst_container: str
 
 
 def main():
 
-    # configurator
-    bc = get_configuration_file()
-    # get jobs
-    jobs, _ = get_jobs(bc)
+    # Get an instance of Backup
+    backup = get_backup()
+    # get jobs from Backup
+    jobs, _ = get_jobs(backup)
 
     # job runner
     for job in jobs:
@@ -76,16 +61,18 @@ def src_dst_creator(copy_params):
 
 
 # Job(BackupConfig)
-def get_configuration_file():
-    bc = BackupConfig(CONFIG_FILENAME)
+# Factory?
+def get_backup():
+    return BackupConfig(CONFIG_FILENAME)
 
 
-def get_jobs(bc):
-    job = Job(bc)
+def get_jobs(backup):
+    job = Job(backup)
     return job.jobs, job.job_containers
 
 
 # ParamBuilder
+# factory?
 def get_container_copy_params(job, container):
     copy_params = CopyParams(
         src_container=container["name"],
@@ -137,6 +124,7 @@ def build_args(z_src, z_dst):
 
 
 # job setup
+# todo fix why no source container path set
 def setup_dest(copy_params):
     z_dst = ZfsUtil(host=copy_params.src_host, user=copy_params.src_host_user)
     z_dst.set_destination_container(copy_params.dst_container)

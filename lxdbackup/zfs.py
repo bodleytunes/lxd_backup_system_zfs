@@ -3,7 +3,7 @@ import os
 from typing import List
 
 from zfslib import zfslib as zfs
-from shared import Utils
+from lxdbackup.shared import Utils
 
 
 class ZfsUtil:

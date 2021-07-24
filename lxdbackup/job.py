@@ -1,4 +1,4 @@
-from lxdbackup.config.base_config import BackupConfig
+from config.base_config import BackupConfig
 
 
 class Job:
