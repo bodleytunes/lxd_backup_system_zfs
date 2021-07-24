@@ -42,20 +42,17 @@ class CopyParams:
 def main():
 
     # configurator
-    # JobRunner
-
-    # configurator
     bc = get_configuration_file()
     # get jobs
-    jobs, job_containers = get_jobs(bc)
+    jobs, _ = get_jobs(bc)
 
     # job runner
     for job in jobs:
-        run_single_job(job)
+        run_job(job)
 
 
 # job runner
-def run_single_job(job):
+def run_job(job):
     for container in job["containers"]:
         container_copy_params = get_container_copy_params(job, container)
         # send to backup pipeline
@@ -88,10 +85,7 @@ def get_jobs(bc):
     return job.jobs, job.job_containers
 
 
-# containerLooper
-
-
-# Builder
+# ParamBuilder
 def get_container_copy_params(job, container):
     copy_params = CopyParams(
         src_container=container["name"],
@@ -119,10 +113,7 @@ def get_container_copy_params(job, container):
 
 # Runner
 def do_backup(run):
-    # loop = asyncio.get_event_loop()
     result = asyncio.run(run.backup())
-    # print(result)
-    # loop.close()
 
 
 # logger
