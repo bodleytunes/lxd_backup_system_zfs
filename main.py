@@ -41,10 +41,10 @@ def run_job(job):
     for container in job["containers"]:
         container_copy_params = get_container_copy_params(job, container)
         # send to backup pipeline
-        send_container_to_backup(container_copy_params)
+        build_copy_command(container_copy_params)
 
 
-def send_container_to_backup(container_copy_params):
+def build_copy_command(container_copy_params):
     z_src, z_dst = src_dst_creator(container_copy_params)
 
     args = build_args(z_src, z_dst)
