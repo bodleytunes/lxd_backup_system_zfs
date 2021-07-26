@@ -50,24 +50,28 @@ class ZfsUtil:
             i.name
             for d in self.datasets
             for i in d
-            if "lxd/containers" in i.path and i.name != "containers"
+            if "containers" in i.path and i.name != "containers"
         ]
-        print(self.all_lxd_dataset_names)
+        # print(self.all_lxd_dataset_names)
 
     def _get_pool_lxd_dataset_paths(self):
         self.all_lxd_dataset_paths = [
             i.path
             for d in self.datasets
             for i in d
-            if "lxd/containers" in i.path and i.name != "containers"
+            if "containers" in i.path and i.name != "containers"
         ]
+        if len(self.all_dataset_paths) > 1:
+            pass
+            # create new empty dataset if not exists
+            # self._create_new_lxd_dataset()
 
     def _get_pool_lxd_dataset_mounts(self):
         self.all_lxd_dataset_mountpoints = [
             i.mountpoint
             for d in self.datasets
             for i in d
-            if "lxd/containers" in i.path and i.name != "containers"
+            if "containers" in i.path and i.name != "containers"
         ]
 
     def print_dataset_names(self):
@@ -98,6 +102,9 @@ class ZfsUtil:
 
     def _create_new_lxd_dataset(self):
         return str(f"{self.lxd_tmp_path}/containers")
+
+    def _create_new_lxd_zfs_dataset(self):
+        pass
 
     def _set_mount_paths(self):
         if len(self.all_lxd_dataset_mountpoints) > 0:
@@ -135,6 +142,7 @@ class Mounter:
         pass
 
 
+# todo
 class BackupFile:
     def __init__(self) -> None:
         pass

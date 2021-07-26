@@ -92,9 +92,9 @@ class CommandRunner:
                 ),
                 # read_stream_and_display(self.process.stderr, sys.stderr.buffer.write),
             )
-        except Exception:
+        except Exception as e:
             self.process.kill()
-            raise
+            raise Exception(e)
         finally:
             # wait for the process to exit
             rc = await self.process.wait()

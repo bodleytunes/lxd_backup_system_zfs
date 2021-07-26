@@ -124,11 +124,26 @@ def build_args(z_src, z_dst):
 
 
 # job setup
-# todo fix why no source container path set
 def setup_dest(copy_params):
+
     z_dst = ZfsUtil(host=copy_params.src_host, user=copy_params.src_host_user)
+
+    # run prechecks #todo
+    run_dataset_prechecks(z_dst)
+
     z_dst.set_destination_container(copy_params.dst_container)
     return z_dst
+
+
+def run_dataset_prechecks(z_dst):
+    # todo
+    lxd_check = DatasetCheck()
+    if check_for_existing_dataset(z_dst.datasets):
+        # if dataset exists return true
+        return
+    else:
+        # todo
+        lxc_dataset_creator = DatasetCreator()
 
 
 # job setup
