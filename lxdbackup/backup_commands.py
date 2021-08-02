@@ -71,43 +71,14 @@ class CommandRunner:
 
         pass
 
-    async def backup(self) -> None:
+    async def backup(self, async_q) -> None:
         # self.process = subprocess.Popen(
         #    self.arg_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         # )
 
-        self.process = await asyncio.create_subprocess_shell(
+        self.process = asyncio.create_subprocess_shell(
             self.arg_string,
             shell=True,
             stdout=asyncio.subprocess.PIPE,
         )
-
-        # stdout, stderr = await self.process.communicate()
-
-        # read child's stdout/stderr concurrently (capture and display)
-        try:
-            stdout, stderr = asyncio.gather(
-                self.read_stream_and_display(
-                    self.process.stdout, sys.stdout.buffer.write
-                ),
-                # read_stream_and_display(self.process.stderr, sys.stderr.buffer.write),
-            )
-        except Exception as e:
-            self.process.kill()
-            raise Exception(e)
-        finally:
-            # wait for the process to exit
-            rc = await self.process.wait()
-
-        return rc, stdout, stderr
-
-    def read_stream_and_display(self, stream, display):
-        """Read from stream line by line until EOF, display, and capture the lines."""
-        output = []
-        while True:
-            line = yield from stream.readline()
-            if not line:
-                break
-            output.append(line)
-            display(line)  # assume it doesn't block
-        return b"".join(output)
+        await async_q.put(self.process)
