@@ -1,16 +1,11 @@
+from asyncio.events import AbstractEventLoop
 from typing import List
 from enum import Enum, auto
 import asyncio
 from pydantic.main import BaseConfig
 from dataclasses import dataclass
-import confuse
 
 
-from lxdbackup.lxd import (
-    LxdBackup,
-    LxdBackupSource,
-    LxdBackupDestination,
-)
 from lxdbackup.job import Job
 
 from lxdbackup.zfs import ZfsUtil
@@ -51,7 +46,7 @@ def build_copy_command(container_copy_params):
     cmd = ArgBuilder(args=args)
     run = CommandRunner(cmd.arg_string)
 
-    do_backup(run)
+    backup(run)
 
 
 def src_dst_creator(copy_params):
@@ -99,8 +94,15 @@ def get_container_copy_params(job, container):
 
 
 # Runner
-def do_backup(run):
-    result = asyncio.run(run.backup())
+def backup(run):
+    loop: AbstractEventLoop = asyncio.get_event_loop()
+    async_q = asyncio.Queue()
+    task = asyncio.gather(run.backup(async_q))
+
+    loop.run_until_complete(task)
+
+    # await async_q.put(run.backup())
+    # result = asyncio.run(run.backup())
 
 
 # logger
@@ -126,16 +128,24 @@ def build_args(z_src, z_dst):
 # job setup
 def setup_dest(copy_params):
 
-    z_dst = ZfsUtil(host=copy_params.src_host, user=copy_params.src_host_user)
+    z_dst = ZfsUtil(host=copy_params.dst_host, user=copy_params.dst_host_user)
 
     # run prechecks #todo
-    run_dataset_prechecks(z_dst)
+    # run_dataset_prechecks(z_dst)
 
     z_dst.set_destination_container(copy_params.dst_container)
     return z_dst
 
 
+# job setup
+def setup_source(copy_params):
+    z_src = ZfsUtil(host=copy_params.src_host, user=copy_params.src_host_user)
+    z_src.set_source_container(copy_params.src_container)
+    return z_src
+
+
 def run_dataset_prechecks(z_dst):
+    return
     # todo
     lxd_check = DatasetCheck()
     if check_for_existing_dataset(z_dst.datasets):
@@ -144,13 +154,6 @@ def run_dataset_prechecks(z_dst):
     else:
         # todo
         lxc_dataset_creator = DatasetCreator()
-
-
-# job setup
-def setup_source(copy_params):
-    z_src = ZfsUtil(host=copy_params.dst_host, user=copy_params.dst_host_user)
-    z_src.set_source_container(copy_params.src_container)
-    return z_src
 
 
 if __name__ == "__main__":
