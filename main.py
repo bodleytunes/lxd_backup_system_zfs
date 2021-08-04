@@ -97,9 +97,9 @@ def get_container_copy_params(job, container):
 def backup(run):
     loop: AbstractEventLoop = asyncio.get_event_loop()
     async_q = asyncio.Queue()
-    tasks = asyncio.gather(run.backup(async_q))
+    task = asyncio.gather(run.backup(async_q))
 
-    loop.run_until_complete(tasks)
+    loop.run_until_complete(task)
 
     # await async_q.put(run.backup())
     # result = asyncio.run(run.backup())
