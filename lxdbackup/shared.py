@@ -6,3 +6,7 @@ class Utils:
     def _split_path(dataset_path):
         component_paths = os.path.split(dataset_path)
         return component_paths[0]
+
+    @staticmethod
+    def _make_unique_list(non_unique_list: list):
+        return set(non_unique_list)

@@ -4,6 +4,7 @@ from enum import Enum, auto
 import asyncio
 from pydantic.main import BaseConfig
 from dataclasses import dataclass
+from lxdbackup.shared import Utils
 
 
 from lxdbackup.job import Job
@@ -50,8 +51,10 @@ def build_copy_command(container_copy_params):
 
 
 def src_dst_creator(copy_params):
+
+    # normal block
     z_src = setup_source(copy_params)
-    z_dst = setup_dest(copy_params)
+    z_dst = setup_dest(copy_params, z_src)
     return z_src, z_dst
 
 
@@ -96,10 +99,11 @@ def get_container_copy_params(job, container):
 # Runner
 def backup(run):
     loop: AbstractEventLoop = asyncio.get_event_loop()
-    async_q = asyncio.Queue()
-    task = asyncio.gather(run.backup(async_q))
+    # async_q = asyncio.Queue()
+    # task = asyncio.gather(run.backup(async_q))
 
-    loop.run_until_complete(task)
+    loop.run_until_complete(run.backup())
+    loop.close()
 
     # await async_q.put(run.backup())
     # result = asyncio.run(run.backup())
@@ -119,21 +123,25 @@ def build_args(z_src, z_dst):
         dst_host=z_dst.host,
         dst_user=z_dst.user,
         zfs_source_path=z_src.source_container_path,
-        zfs_destination_path=z_dst.destination_container_path,
+        zfs_destination_container_path=z_dst.destination_container_path,
     )
 
     return args
 
 
 # job setup
-def setup_dest(copy_params):
+def setup_dest(copy_params, z_src):
 
     z_dst = ZfsUtil(host=copy_params.dst_host, user=copy_params.dst_host_user)
+    # just in case the hosts are the same
+    if copy_params.src_host == copy_params.dst_host:
+        z_dst.source_container_path = z_src.lxd_dataset_path
+        z_dst.set_destination_container(copy_params.dst_container)
+        return z_dst
 
-    # run prechecks #todo
-    # run_dataset_prechecks(z_dst)
-
+    # usual block
     z_dst.set_destination_container(copy_params.dst_container)
+
     return z_dst
 
 

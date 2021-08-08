@@ -21,7 +21,7 @@ class SyncoidArgs(CmdArgs):
     dst_host: str = "p21"
 
     zfs_source_path: Optional[str] = None
-    zfs_destination_path: Optional[str] = None
+    zfs_destination_container_path: Optional[str] = None
 
     mbuffer_size: int = 128
     pv_options: str = "-b"
@@ -51,7 +51,7 @@ class ArgBuilder:
 
     def _build_dst(self):
         return str(
-            f"{self.syncoid_args.dst_user}@{self.syncoid_args.dst_host}:{self.syncoid_args.zfs_destination_path}"
+            f"{self.syncoid_args.dst_user}@{self.syncoid_args.dst_host}:{self.syncoid_args.zfs_destination_container_path}"
         )
 
     def _build_params(self):
@@ -71,7 +71,7 @@ class CommandRunner:
 
         pass
 
-    async def backup(self, async_q) -> None:
+    async def backup(self) -> None:
         # self.process = subprocess.Popen(
         #    self.arg_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         # )
@@ -81,4 +81,4 @@ class CommandRunner:
             shell=True,
             stdout=asyncio.subprocess.PIPE,
         )
-        await async_q.put(self.process)
+        await self.process

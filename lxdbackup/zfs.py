@@ -3,6 +3,7 @@ import os
 from typing import List
 
 from zfslib import zfslib as zfs
+
 from lxdbackup.shared import Utils
 
 
@@ -74,14 +75,6 @@ class ZfsUtil:
             if "containers" in i.path and i.name != "containers"
         ]
 
-    def print_dataset_names(self):
-        for n in self.all_lxd_dataset_names:
-            print(f"dataset name:  {n}")
-
-    def print_dataset_paths(self):
-        for p in self.all_lxd_dataset_paths:
-            print(f"dataset path:  {p}")
-
     def set_source_container(self, container_name: str):
         for path in self.all_lxd_dataset_paths:
             if container_name in path:
@@ -89,6 +82,7 @@ class ZfsUtil:
                 return
 
     def set_destination_container(self, container_name: str):
+
         self.destination_container_path = str(
             f"{self.lxd_dataset_path}/{container_name}"
         )
@@ -96,9 +90,9 @@ class ZfsUtil:
     def _set_dataset_path(self):
         if len(self.all_lxd_dataset_paths) > 0:
             self.lxd_dataset_path = Utils._split_path(self.all_lxd_dataset_paths[0])
-        if len(self.all_dataset_paths) > 0:
-            self.lxd_tmp_path = Utils._split_path(self.all_dataset_paths[0])
-            self.lxd_dataset_path = self._create_new_lxd_dataset()
+        # if len(self.all_dataset_paths) > 0:
+        #    self.lxd_tmp_path = Utils._split_path(self.all_dataset_paths[0])
+        #    self.lxd_dataset_path = self._create_new_lxd_dataset()
 
     def _create_new_lxd_dataset(self):
         return str(f"{self.lxd_tmp_path}/containers")
@@ -113,10 +107,7 @@ class ZfsUtil:
                 for mount in self.all_lxd_dataset_mountpoints
                 if mount != "none"
             ]
-            self.all_lxd_mount_paths = self._make_unique_list(all_lxd_mount_paths)
-
-    def _make_unique_list(self, non_unique_list: list):
-        return set(non_unique_list)
+            self.all_lxd_mount_paths = Utils._make_unique_list(all_lxd_mount_paths)
 
     def _get_dataset_mounts(self):
 
