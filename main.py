@@ -135,14 +135,18 @@ def setup_dest(copy_params, z_src):
     z_dst = ZfsUtil(host=copy_params.dst_host, user=copy_params.dst_host_user)
     # just in case the hosts are the same
     if copy_params.src_host == copy_params.dst_host:
-        z_dst.source_container_path = z_src.lxd_dataset_path
-        z_dst.set_destination_container(copy_params.dst_container)
+        set_dst_container_same_host(copy_params, z_src, z_dst)
         return z_dst
 
     # usual block
     z_dst.set_destination_container(copy_params.dst_container)
 
     return z_dst
+
+
+def set_dst_container_same_host(copy_params, z_src, z_dst):
+    z_dst.source_container_path = z_src.lxd_dataset_path
+    z_dst.set_destination_container(copy_params.dst_container)
 
 
 # job setup
@@ -155,13 +159,6 @@ def setup_source(copy_params):
 def run_dataset_prechecks(z_dst):
     return
     # todo
-    lxd_check = DatasetCheck()
-    if check_for_existing_dataset(z_dst.datasets):
-        # if dataset exists return true
-        return
-    else:
-        # todo
-        lxc_dataset_creator = DatasetCreator()
 
 
 if __name__ == "__main__":
