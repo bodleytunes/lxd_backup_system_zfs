@@ -7,7 +7,7 @@ authors = ["Jon Clayton <m87tech@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 pydantic = "^1.8.2"
-paramiko = "^2.7.2"
+paramiko = "^3.4.0"
 PyYAML = "^5.4.1"
 pylxd = "^2.3.0"
 confuse = "^1.4.0"
